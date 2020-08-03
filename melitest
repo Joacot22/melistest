@@ -1,0 +1,50 @@
+#!/usr/bin/php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit;
+}
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Minicli\App;
+use Minicli\Command\CommandCall;
+ 
+$app = new App();
+$app->setSignature('./melitest test');
+$app->registerCommand('test', function(CommandCall $input) {
+
+	$seller_id = $input->getParam('seller_id');
+	$sellers_id = explode(',', $seller_id); 
+	
+	$categories = [];
+	foreach($sellers_id as $sell_id){
+		$products = getInfoTest($sell_id);
+		foreach ($products as $key => $product) {
+			if(!array_key_exists($product->category_id, $categories)){
+				$ch = curl_init('https://api.mercadolibre.com/categories/'.$product->category_id);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				$resp = curl_exec($ch);
+				$category = json_decode($resp);
+				$categories[$category->id] = $category->name;			
+			}
+			$category_name = $categories[$product->category_id];
+			echo "{$product->id}, {$product->title}, {$product->category_id}, {$category_name}\n";
+		}
+	}
+	
+});
+
+$app->runCommand($argv);
+
+function getInfoTest($seller_id){
+	$url = 'https://api.mercadolibre.com/sites/MLA/search?seller_id='.$seller_id;
+		
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$resp = curl_exec($ch);		
+	$response = json_decode($resp);
+	curl_close($ch);
+	
+	return $response->results;
+}
