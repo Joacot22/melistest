@@ -33,7 +33,8 @@ Para guardar el archivo, ejecutar el comando "./mercadolibre items seller_id=VAL
 **Ejemplo:**
 
 ```
-./melitest test seller_id='VALOR_DE_ID' > Listado.log
+./melitest test seller_id='VALOR_DE_ID' > resultado.log
+./melitest test seller_id='VALOR_DE_ID' > resultado.txt
 ```
 
 
